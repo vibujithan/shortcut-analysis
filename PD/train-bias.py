@@ -10,7 +10,7 @@ from torch.utils.data import DataLoader
 from torch.utils.tensorboard import SummaryWriter
 from tqdm import tqdm
 
-from models import SFCN
+from models.sfcn_original import SFCN
 from utils.datasets import TorchDataset as TD
 
 
@@ -215,7 +215,7 @@ def main():
     for c in classes:
 
         model = SFCN()
-        model.load_state_dict(torch.load('checkpoints-PD/best_model.pt')['model_state_dict'])
+        model.load_state_dict(torch.load('checkpoints/PD-SFCN/best_model.pt')['model_state_dict'])
 
         for name, param in model.named_parameters():
             param.requires_grad = False

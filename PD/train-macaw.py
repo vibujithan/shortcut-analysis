@@ -177,9 +177,9 @@ class Trainer:
 
 
 def main():
-    block = 'block5'
-    train_path = f'/data/Data/PD/PCA_{block}_train'
-    val_path = f'/data/Data/PD/PCA_{block}_val'
+    block = 'flat'
+    train_path = f'/data/Data/PD/activations_{block}_train'
+    val_path = f'/data/Data/PD/activations_{block}_val'
 
     batch_size = 128
     latent_size = 16
@@ -196,7 +196,7 @@ def main():
         learning_rate=1e-4,
         weight_decay=1e-5,
         gradient_clip_val=1.0,
-        save_dir=f'checkpoints/macaw-{block}',
+        save_dir=f'checkpoints/act-macaw-{block}',
         device='cuda',
         use_tb=True
     )

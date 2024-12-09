@@ -9,7 +9,7 @@ from torch.utils.data import DataLoader
 from torch.utils.tensorboard import SummaryWriter
 from tqdm import tqdm
 
-from models import SFCN
+from models.sfcn_original import SFCN
 from utils.datasets import TorchDataset as TD
 
 
@@ -101,14 +101,14 @@ class Trainer:
             # Move batch to device
             x = batch[0].to(self.device)
             y = batch[1].to(self.device)
-            y = torch.unsqueeze(y, 1)
+            y = torch.squeeze(y)
 
             # Zero gradients
             self.optimizer.zero_grad()
 
             # Forward pass with mixed precision
             with autocast():
-                y_pred = self.model(x)
+                y_pred = self.model(x).squeeze()
                 loss = self.criterion(y_pred, y.to(torch.float))
 
             # Backward pass with gradient scaling
@@ -143,11 +143,11 @@ class Trainer:
         for batch in tqdm(self.val_loader, desc='Validation'):
             x = batch[0].to(self.device)
             y = batch[1].to(self.device)
-            y = torch.unsqueeze(y, 1)
+            y = torch.squeeze(y)
 
             # Forward pass with mixed precision
             with autocast():
-                y_pred = self.model(x)
+                y_pred = self.model(x).squeeze()
                 loss = self.criterion(y_pred, y.to(torch.float))
 
             total_loss += loss.item()
@@ -201,7 +201,8 @@ def main():
     train_loader = DataLoader(TD(train_path), batch_size=batch_size, shuffle=True)
     val_loader = DataLoader(TD(val_path), batch_size=batch_size)
 
-    model = SFCN()
+    model = SFCN(output_dim=1, channel_number=[28, 58, 128, 256, 256, 64])
+    # model = resnet18()
 
     trainer = Trainer(
         model=model,
@@ -210,15 +211,15 @@ def main():
         learning_rate=1e-4,
         weight_decay=1e-5,
         gradient_clip_val=1.0,
-        save_dir='checkpoints/PD',
+        save_dir='checkpoints/PD-SFCN-BKUP',
         device='cuda',
         use_tb=True
     )
 
     # Train model
     trainer.train(
-        num_epochs=100,
-        resume_from=None  # or path to checkpoint
+        num_epochs=200,
+        resume_from=None
     )
 
 
