@@ -10,6 +10,9 @@ from tqdm import tqdm
 from tqdm.auto import tqdm
 
 from models.macaw import MACAW
+
+import sys
+sys.path.append('/data/Code/bias-analysis/')
 from utils.datasets import TorchDataset as TD
 
 
@@ -149,7 +152,7 @@ class Trainer:
             print(f'Resuming training from epoch {start_epoch}')
 
         if self.use_tb:
-            writer = SummaryWriter(f'runs/{self.save_dir}')
+            writer = SummaryWriter(f'PD/runs/{self.save_dir}')
 
         for epoch in range(start_epoch, num_epochs):
             train_loss = self.train_epoch(epoch)
@@ -196,7 +199,7 @@ def main():
         learning_rate=1e-4,
         weight_decay=1e-5,
         gradient_clip_val=1.0,
-        save_dir=f'checkpoints/act-macaw-{block}',
+        save_dir=f'PD/checkpoints/act-macaw-{block}',
         device='cuda',
         use_tb=True
     )
