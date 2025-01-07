@@ -208,10 +208,10 @@ def main():
         model=model,
         train_loader=train_loader,
         val_loader=val_loader,
-        learning_rate=1e-4,
+        learning_rate=1e-5,
         weight_decay=1e-5,
         gradient_clip_val=1.0,
-        save_dir='checkpoints/PD-SFCN-BKUP',
+        save_dir='checkpoints/PD-SFCN',
         device='cuda',
         use_tb=True
     )

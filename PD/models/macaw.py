@@ -7,7 +7,7 @@ import torch.nn.functional as F
 
 
 class MACAW(nn.Module):
-    def __init__(self, nlatents, nlayers=4, hidden=[4, 6, 4], device='cuda'):
+    def __init__(self, nlatents, nlayers=6, hidden=[4, 6, 4], device='cuda'):
         super().__init__()
 
         self.nlatents = nlatents
@@ -16,20 +16,17 @@ class MACAW(nn.Module):
         self.device = device
         self.ncauses = 4
 
-        P_PD = 0.35
-        P_sex = 0.61
-        P_study = np.array([0.18702290076335878,
-                            0.0717557251908397,
-                            0.03206106870229008,
-                            0.028244274809160305,
-                            0.03435114503816794,
-                            0.04732824427480916,
-                            0.30763358778625954,
-                            0.05648854961832061,
-                            0.09236641221374046,
-                            0.059541984732824425,
-                            0.05801526717557252,
-                            0.025190839694656488])
+        P_PD = 0.5101796407185629
+        P_sex = 0.57724550
+        P_study = np.array([0.14491017964071856,
+                            0.2934131736526946,
+                            0.13532934131736526,
+                            0.09101796407185629,
+                            0.05029940119760479,
+                            0.05389221556886228,
+                            0.07425149700598803,
+                            0.04431137724550898,
+                            0.1125748502994012])
 
         # Causal DAG
         study_to_latents = [(0, i) for i in range(self.ncauses, self.nlatents + self.ncauses)]
@@ -43,15 +40,15 @@ class MACAW(nn.Module):
 
         # sex_to_pd = [(1, 3)]
 
-        # autoregressive_latents = [(i, j) for i in range(self.ncauses, self.nlatents + self.ncauses) for j in
-        #                           range(i + 1, self.nlatents + self.ncauses)]
+        autoregressive_latents = [(i, j) for i in range(self.ncauses, self.nlatents + self.ncauses) for j in
+                                  range(i + 1, self.nlatents + self.ncauses)]
 
         edges = (study_to_latents +
                  sex_to_latents +
                  scanner_to_latents +
                  PD_to_latents +
-                 study_to_scanner)
-        # autoregressive_latents)
+                 study_to_scanner )
+                 # autoregressive_latents)
 
         self.priors = [
             (slice(0, 1), td.Categorical(torch.tensor(P_study).to(self.device))),

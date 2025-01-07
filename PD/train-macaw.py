@@ -9,7 +9,7 @@ from torch.utils.tensorboard import SummaryWriter
 from tqdm import tqdm
 from tqdm.auto import tqdm
 
-from models import MACAW
+from models.macaw import MACAW
 from utils.datasets import TorchDataset as TD
 
 
@@ -181,8 +181,8 @@ def main():
     train_path = f'/data/Data/PD/activations_{block}_train'
     val_path = f'/data/Data/PD/activations_{block}_val'
 
-    batch_size = 128
-    latent_size = 16
+    batch_size = 64
+    latent_size = 64
 
     train_loader = DataLoader(TD(train_path), batch_size=batch_size, shuffle=True)
     val_loader = DataLoader(TD(val_path), batch_size=batch_size)
@@ -203,8 +203,8 @@ def main():
 
     # Train model
     trainer.train(
-        num_epochs=300,
-        resume_from=None    )
+        num_epochs=500,
+        resume_from=None)
 
 
 if __name__ == "__main__":

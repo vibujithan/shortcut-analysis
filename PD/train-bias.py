@@ -205,34 +205,34 @@ def main():
     train_path = '/data/Data/PD/train'
     val_path = '/data/Data/PD/val'
 
-    batch_size = 16
+    batch_size = 8
 
     train_loader = DataLoader(TD(train_path), batch_size=batch_size, shuffle=True)
     val_loader = DataLoader(TD(val_path), batch_size=batch_size)
 
-    classes = np.arange(10)
+    classes = np.arange(1)
 
     for c in classes:
 
-        model = SFCN()
+        model = SFCN(output_dim=1, channel_number=[28, 58, 128, 256, 256, 64])
         model.load_state_dict(torch.load('checkpoints/PD-SFCN/best_model.pt')['model_state_dict'])
 
         for name, param in model.named_parameters():
             param.requires_grad = False
 
-        model.fc1.weight.requires_grad = True
-        model.fc1.bias.requires_grad = True
+        model.classifier.fc.weight.requires_grad = True
+        model.classifier.fc.bias.requires_grad = True
 
         trainer = Trainer(
             model=model,
             train_loader=train_loader,
             val_loader=val_loader,
-            label_idx=5,
+            label_idx=2,
             class_idx=c,
             learning_rate=1e-4,
             weight_decay=1e-5,
             gradient_clip_val=1.0,
-            save_dir='checkpoints-bias',
+            save_dir='checkpoints/study-Sex',
             device='cuda',
             use_tb=True
         )
