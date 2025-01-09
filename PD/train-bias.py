@@ -11,6 +11,9 @@ from torch.utils.tensorboard import SummaryWriter
 from tqdm import tqdm
 
 from models.sfcn_original import SFCN
+
+import sys
+sys.path.append('/data/Code/bias-analysis/')
 from utils.datasets import TorchDataset as TD
 
 
@@ -173,7 +176,7 @@ class Trainer:
             print(f'Resuming training from epoch {start_epoch}')
 
         if self.use_tb:
-            writer = SummaryWriter('runs')
+            writer = SummaryWriter('PD/runs')
 
         for epoch in range(start_epoch, num_epochs):
             train_loss = self.train_epoch(epoch)
@@ -210,12 +213,12 @@ def main():
     train_loader = DataLoader(TD(train_path), batch_size=batch_size, shuffle=True)
     val_loader = DataLoader(TD(val_path), batch_size=batch_size)
 
-    classes = np.arange(1)
+    classes = np.arange(9)
 
     for c in classes:
 
         model = SFCN(output_dim=1, channel_number=[28, 58, 128, 256, 256, 64])
-        model.load_state_dict(torch.load('checkpoints/PD-SFCN/best_model.pt')['model_state_dict'])
+        model.load_state_dict(torch.load('PD/checkpoints/PD-SFCN/best_model.pt')['model_state_dict'])
 
         for name, param in model.named_parameters():
             param.requires_grad = False
@@ -227,12 +230,12 @@ def main():
             model=model,
             train_loader=train_loader,
             val_loader=val_loader,
-            label_idx=2,
+            label_idx=3,
             class_idx=c,
             learning_rate=1e-4,
             weight_decay=1e-5,
             gradient_clip_val=1.0,
-            save_dir='checkpoints/study-Sex',
+            save_dir='PD/checkpoints/study-SFCN',
             device='cuda',
             use_tb=True
         )
