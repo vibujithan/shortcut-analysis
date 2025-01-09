@@ -14,8 +14,8 @@ class MACAW(nn.Module):
         self.n_layers = nlayers
         self.hidden = hidden
         self.device = device
-        self.ncauses = 4
-
+        self.ncauses = 9+8+1+1
+        
         P_PD = 0.5101796407185629
         P_sex = 0.57724550
         P_study = np.array([0.14491017964071856,
@@ -29,13 +29,13 @@ class MACAW(nn.Module):
                             0.1125748502994012])
 
         # Causal DAG
-        study_to_latents = [(0, i) for i in range(self.ncauses, self.nlatents + self.ncauses)]
-        sex_to_latents = [(1, i) for i in range(self.ncauses, self.nlatents + self.ncauses)]
-        scanner_to_latents = [(2, i) for i in range(self.ncauses, self.nlatents + self.ncauses)]
-        PD_to_latents = [(3, i) for i in range(self.ncauses, self.nlatents + self.ncauses)]
+        study_to_latents = [(i, j) for i in range(9) for j in range(self.ncauses, self.nlatents + self.ncauses)]
+        sex_to_latents = [(9, i) for i in range(self.ncauses, self.nlatents + self.ncauses)]
+        scanner_to_latents = [(10+i, j) for i in range(8) for j in range(self.ncauses, self.nlatents + self.ncauses)]
+        PD_to_latents = [(18, i) for i in range(self.ncauses, self.nlatents + self.ncauses)]
 
         # study_to_sex = [(0, 1)]
-        study_to_scanner = [(0, 2)]
+        study_to_scanner = [(i, j) for i in range(9) for j in range(10, 18)]
         # study_to_pd = [(0, 3)]
 
         # sex_to_pd = [(1, 3)]
@@ -51,11 +51,11 @@ class MACAW(nn.Module):
                  # autoregressive_latents)
 
         self.priors = [
-            (slice(0, 1), td.Categorical(torch.tensor(P_study).to(self.device))),
-            (slice(1, 2), td.Bernoulli(torch.tensor(P_sex).to(self.device))),
-            (slice(2, 3), td.Normal(torch.zeros(1).to(self.device), torch.ones(
+            (slice(0, 9), td.OneHotCategorical(torch.tensor(P_study).to(self.device))),
+            (slice(9, 10), td.Bernoulli(torch.tensor(P_sex).to(self.device))),
+            (slice(10, 18), td.Normal(torch.zeros(1).to(self.device), torch.ones(
                 1).to(self.device))),
-            (slice(3, 4), td.Bernoulli(torch.tensor(P_PD).to(self.device))),
+            (slice(18, 19), td.Bernoulli(torch.tensor(P_PD).to(self.device))),
             (slice(self.ncauses, self.nlatents + self.ncauses),
              td.Normal(torch.zeros(self.nlatents).to(self.device), torch.ones(
                  self.nlatents).to(self.device)))]

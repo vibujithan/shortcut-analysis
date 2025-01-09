@@ -206,8 +206,8 @@ def main():
 
     # Train model
     trainer.train(
-        num_epochs=500,
-        resume_from=None)
+        num_epochs=3000,
+        resume_from=f'PD/checkpoints/act-macaw-{block}/latest_checkpoint.pt')
 
 
 if __name__ == "__main__":
