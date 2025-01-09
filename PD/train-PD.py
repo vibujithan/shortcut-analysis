@@ -10,6 +10,9 @@ from torch.utils.tensorboard import SummaryWriter
 from tqdm import tqdm
 
 from models.sfcn_original import SFCN
+
+import sys
+sys.path.append('/data/Code/bias-analysis/')
 from utils.datasets import TorchDataset as TD
 
 
@@ -164,7 +167,7 @@ class Trainer:
             print(f'Resuming training from epoch {start_epoch}')
 
         if self.use_tb:
-            writer = SummaryWriter('runs')
+            writer = SummaryWriter('PD/runs')
 
         for epoch in range(start_epoch, num_epochs):
             train_loss = self.train_epoch(epoch)
@@ -211,7 +214,7 @@ def main():
         learning_rate=1e-5,
         weight_decay=1e-5,
         gradient_clip_val=1.0,
-        save_dir='checkpoints/PD-SFCN',
+        save_dir='PD/checkpoints/PD-SFCN',
         device='cuda',
         use_tb=True
     )
