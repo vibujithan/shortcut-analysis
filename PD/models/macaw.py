@@ -50,17 +50,7 @@ class MACAW(nn.Module):
             (18, i) for i in range(self.ncauses, self.nlatents + self.ncauses)
         ]
 
-        # study_to_sex = [(0, 1)]
         study_to_scanner = [(i, j) for i in range(9) for j in range(10, 18)]
-        # study_to_pd = [(0, 3)]
-
-        # sex_to_pd = [(1, 3)]
-
-        # autoregressive_latents = [
-        #     (i, j)
-        #     for i in range(self.ncauses, self.nlatents + self.ncauses)
-        #     for j in range(i + 1, self.nlatents + self.ncauses)
-        # ]
 
         edges = (
             study_to_latents

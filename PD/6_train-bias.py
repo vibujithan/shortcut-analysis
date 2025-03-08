@@ -10,11 +10,12 @@ from torch.utils.data import DataLoader
 from torch.utils.tensorboard import SummaryWriter
 from tqdm import tqdm
 
-from PD.models.sfcn import SFCN
 
 import sys
 
 sys.path.append("/data/Code/bias-analysis/")
+from PD.models.sfcn import SFCN
+
 from utils.datasets import TorchDataset as TD
 
 
@@ -41,6 +42,9 @@ class Trainer:
         self.label_idx = label_idx
         self.class_idx = class_idx
 
+        self.save_dir = Path(save_dir)
+        self.save_dir.mkdir(parents=True, exist_ok=True)
+
         # Initialize optimizer
         self.optimizer = optim.AdamW(
             self.model.parameters(), lr=learning_rate, weight_decay=weight_decay
@@ -57,10 +61,6 @@ class Trainer:
         # Mixed precision training
         self.scaler = GradScaler()
         self.gradient_clip_val = gradient_clip_val
-
-        # Checkpointing
-        self.save_dir = Path(save_dir + f"-{label_idx}-{class_idx}")
-        self.save_dir.mkdir(parents=True, exist_ok=True)
 
         # Best model tracking
         self.best_val_loss = float("inf")
@@ -201,10 +201,12 @@ class Trainer:
 
 
 def main():
+    model_name = "PD-SFCN-GroupDRO"
     train_path = "/data/Data/PD/train"
     val_path = "/data/Data/PD/val"
 
     batch_size = 8
+    label_idx = 3
 
     train_loader = DataLoader(TD(train_path), batch_size=batch_size, shuffle=True)
     val_loader = DataLoader(TD(val_path), batch_size=batch_size)
@@ -214,7 +216,7 @@ def main():
     for c in classes:
         model = SFCN(output_dim=1, channel_number=[28, 58, 128, 256, 256, 64])
         model.load_state_dict(
-            torch.load("PD/checkpoints/PD-SFCN/best_model.pt")["model_state_dict"]
+            torch.load(f"PD/checkpoints/{model_name}/best_model.pt")["model_state_dict"]
         )
 
         for name, param in model.named_parameters():
@@ -223,24 +225,30 @@ def main():
         model.classifier.fc.weight.requires_grad = True
         model.classifier.fc.bias.requires_grad = True
 
+        save_dir = f"PD/checkpoints/{model_name}-study-{label_idx}-{c}"
+
         trainer = Trainer(
             model=model,
             train_loader=train_loader,
             val_loader=val_loader,
-            label_idx=3,
+            label_idx=label_idx,
             class_idx=c,
             learning_rate=1e-4,
             weight_decay=1e-5,
             gradient_clip_val=1.0,
-            save_dir="PD/checkpoints/study-SFCN",
+            save_dir=save_dir,
             device="cuda",
             use_tb=True,
         )
 
+        checkpoint_path = f"{save_dir}/latest_checkpoint.pt"
+        if not Path(checkpoint_path).exists():
+            checkpoint_path = None
+
         # Train model
         trainer.train(
             num_epochs=100,
-            resume_from=None,  # or path to checkpoint
+            resume_from=checkpoint_path,
         )
 
 

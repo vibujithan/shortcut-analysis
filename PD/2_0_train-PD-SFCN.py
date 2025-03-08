@@ -203,7 +203,6 @@ def main():
     val_loader = DataLoader(TD(val_path), batch_size=batch_size)
 
     model = SFCN(output_dim=1, channel_number=[28, 58, 128, 256, 256, 64])
-    # model = resnet18()
 
     trainer = Trainer(
         model=model,
